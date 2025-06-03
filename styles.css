@@ -1,0 +1,185 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full screen height */
+}
+
+.top {
+  height: 10%;
+  background-color: #3498db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.middle {
+  height: 50%;
+  background-color: #2ecc71;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.bottom {
+  height: 40%;
+  background-color: #f1c40f;
+  display: flex;
+}
+
+.bottom-box {
+  flex: 1;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e67e22;
+  color: white;
+}
+
+.bordered {
+  border: 2px solid #333;
+  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+}
+
+.wrapper {
+  display: flex;
+  flex-wrap: wrap; /* 👈 allows children to wrap */
+  gap: 10px; /* spacing between boxes */
+  width: 100%; /* or any constrained width */
+}
+
+.button-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: white;
+  border: 2px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5em;
+  color: #f39c12;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.button-circle:hover {
+  transform: scale(1.1);
+}
+
+.clickable-counter {
+  cursor: pointer;
+  user-select: none;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 300px;
+  max-width: 90%;
+  text-align: center;
+  animation: popupIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popupIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Start hidden */
+.hidden {
+  display: none !important;
+}
+
+/* Fullscreen dark overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* The white popup "window" */
+.popup-window {
+  background-color: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  min-width: 300px;
+  max-width: 90%;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+/* building buttons */
+.build-btn {
+  font-size: 1.2rem;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.build-btn.disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between; /* or use space-around / space-evenly */
+  align-items: center;
+  gap: 16px; /* spacing between counters */
+  padding: 10px;
+}
+
+.clickable-counter {
+  background-color: #f4f4f4;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}

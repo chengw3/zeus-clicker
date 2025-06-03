@@ -1,18 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Cookie Clicker</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>Cookie Clicker</h1>
-  <button id="cookie">🍪 Click Me!</button>
-  <p>Cookies: <span id="count">0</span></p>
-  <p>Cookies: <span id="count">0</span></p>
-  <p>Cookies: <span id="count">0</span></p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3-Layer Div Layout</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="top">
+        <!-- Trigger -->
+        <div id="people-counter" class="clickable-counter">
+          👥 People: <span id="people-count">0</span>
+        </div>
+        <div id="time-counter" class="clickable-counter">
+          ⏰ Time: <span id="time-count">0</span>
+        </div>
+        <div id="co2-counter" class="clickable-counter">
+          CO₂: <span id="co2-count">0</span>
+        </div>
+        <div id="energy-counter" class="clickable-counter">
+          Energy: <span id="energy-count">0</span>
+        </div>
+      </div>
+      <div id="middle" class="middle wrapper">Middle (40%)</div>
+      <div class="bottom">
+        <div class="bottom-box bordered">Box 1</div>
+        <div id="build-buttons"></div>
+        <div class="bottom-box bordered">
+          <button id="add-people" class="button-circle">🧍</button>
+        </div>
+        <div class="bottom-box bordered">Box 3</div>
+      </div>
+    </div>
 
-
-  <script src="script.js"></script>
-</body>
+    <!-- <script src="popup.js"></script> -->
+    <script src="create-buttons.js"></script>
+    <script src="game-manager.js"></script>
+    <script src="main.js"></script>
+  </body>
 </html>
