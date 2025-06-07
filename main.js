@@ -1,8 +1,11 @@
+import { GameManager } from "./GameManager.js";
+
 const game = new GameManager();
 
 setInterval(() => {
   game.tick(1); // Simulates 1 second passing
   updateUI(game); // Optional: refresh HTML with latest values
+  renderBuildButtons(game); // Update the build buttons UI
 }, 500); // every 1000 ms = 1 second
 
 function updateUI(game) {

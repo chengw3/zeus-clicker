@@ -9,19 +9,17 @@ function renderBuildButtons(gameManager) {
   container.innerHTML = ""; // clear old buttons
 
   for (const buildingName in gameManager.baseBuildingStats) {
-    const stats = gameManager.getEffectiveStats(buildingName);
-    const cost = stats.staticCost;
+    const buildingStats = gameManager.getBuildingStats(buildingName);
 
     const btn = document.createElement("button");
     btn.textContent = `${
       buildingEmojis[buildingName] || buildingName
     } ${buildingName}`;
-    btn.className = "build-btn";
+    btn.className = "purchase-btn";
 
     // Disable if player can't afford it
     const notEnough =
-      gameManager.state.totalEnergy < (cost.energy || 0) ||
-      gameManager.state.totalCO2 < (cost.co2 || 0);
+      gameManager.state.totalEnergy < (buildingStats.staticImpact.energy || 0);
 
     if (notEnough) {
       btn.disabled = true;
@@ -30,8 +28,58 @@ function renderBuildButtons(gameManager) {
 
     // Attach build logic
     btn.addEventListener("click", () => {
-      gameManager.build(buildingName);
+      gameManager.purchaseBuilding(buildingName);
       renderBuildButtons(gameManager); // re-render buttons after state changes
+    });
+
+    container.appendChild(btn);
+  }
+}
+
+// Function to render a single building's display
+// This function will create a display element for each building
+function renderBuilding(buildingName) {
+  const container = document.getElementById("building-display");
+  if (!container) {
+    console.warn("No #building-display container found");
+    return;
+  }
+
+  const count = this.buildings?.[buildingName] || 0;
+  const emoji = buildingEmojis?.[buildingName] || "🏗️";
+
+  // Create display element
+  const buildingElement = document.createElement("div");
+  buildingElement.className = "building-entry";
+  buildingElement.textContent = `${emoji} ${buildingName} × ${count}`;
+
+  // Append to container
+  container.appendChild(buildingElement);
+}
+
+// Function to render upgrade buttons
+// This function will create buttons for each upgrade available in the game
+function renderUpgradeButtons(gameManager) {
+  const container = document.getElementById("upgrade-buttons");
+  container.innerHTML = ""; // clear old buttons
+
+  for (const UpgradeName in gameManager.baseBuildingStats) {
+    const stats = gameManager.getUpgradeStats(UpgradeName);
+
+    const btn = document.createElement("button");
+    btn.textContent = `Upgrade ${UpgradeName}`;
+    btn.className = "purchase-btn";
+
+    if (gameManager.canUpgrade(UpgradeName)) {
+      btn.classList.add("available"); // add CSS to highlight it
+    } else {
+      btn.classList.add("disabled"); // add CSS to grey it out
+    }
+
+    // Attach upgrade logic
+    btn.addEventListener("click", () => {
+      gameManager.purchaseUpgrade(UpgradeName);
+      renderUpgradeButtons(gameManager); // re-render buttons after state changes
     });
 
     container.appendChild(btn);

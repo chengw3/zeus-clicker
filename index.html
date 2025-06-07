@@ -23,10 +23,16 @@
           Energy: <span id="energy-count">0</span>
         </div>
       </div>
-      <div id="middle" class="middle wrapper">Middle (40%)</div>
+      <div id="middle" class="middle wrapper">
+        Middle (40%)
+        <div id="building-display"></div>
+      </div>
       <div class="bottom">
-        <div class="bottom-box bordered">Box 1</div>
-        <div id="build-buttons"></div>
+        <div class="bottom-box bordered">
+          <div id="build-title" class="title" style="display: block">Build</div>
+          <div id="build-buttons" style="display: block"></div>
+        </div>
+
         <div class="bottom-box bordered">
           <button id="add-people" class="button-circle">🧍</button>
         </div>
@@ -36,7 +42,7 @@
 
     <!-- <script src="popup.js"></script> -->
     <script src="create-buttons.js"></script>
-    <script src="game-manager.js"></script>
-    <script src="main.js"></script>
+    <script type="module" src="gameManager.js"></script>
+    <script type="module" src="main.js"></script>
   </body>
 </html>
