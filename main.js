@@ -1,12 +1,14 @@
-import { GameManager } from "./GameManager.js";
+import { GameManager } from "./game-manager.js";
 
-const game = new GameManager();
+window.game = new GameManager();
+renderBuildButtons(game); // Update the build buttons UI
+renderBuildings(game); // Update the building display UI
+renderUpgradeButtons(game); // Update the upgrade buttons UI
 
 setInterval(() => {
-  game.tick(1); // Simulates 1 second passing
+  game.tick(0.1); // Simulates 1 second passing
   updateUI(game); // Optional: refresh HTML with latest values
-  renderBuildButtons(game); // Update the build buttons UI
-}, 500); // every 1000 ms = 1 second
+}, 100); // every 1000 ms = 1 second
 
 function updateUI(game) {
   document.getElementById("energy-count").textContent = Math.floor(

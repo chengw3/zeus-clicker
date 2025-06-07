@@ -38,23 +38,29 @@ function renderBuildButtons(gameManager) {
 
 // Function to render a single building's display
 // This function will create a display element for each building
-function renderBuilding(buildingName) {
+function renderBuildings(gameManager) {
+  console.log("Rendering buildings...");
   const container = document.getElementById("building-display");
   if (!container) {
     console.warn("No #building-display container found");
     return;
   }
 
-  const count = this.buildings?.[buildingName] || 0;
-  const emoji = buildingEmojis?.[buildingName] || "🏗️";
+  container.innerHTML = ""; // Clear old content
+  if (!gameManager || !gameManager.buildingCount) {
+    console.warn("GameManager or buildingCount is not defined");
+    return;
+  }
+  for (const buildingName in gameManager.buildingCount) {
+    const count = gameManager.buildingCount[buildingName];
+    const emoji = buildingEmojis?.[buildingName] || "🏗️";
 
-  // Create display element
-  const buildingElement = document.createElement("div");
-  buildingElement.className = "building-entry";
-  buildingElement.textContent = `${emoji} ${buildingName} × ${count}`;
+    const buildingElement = document.createElement("div");
+    buildingElement.className = "building-entry";
+    buildingElement.textContent = `${emoji} ${buildingName} × ${count}`;
 
-  // Append to container
-  container.appendChild(buildingElement);
+    container.appendChild(buildingElement);
+  }
 }
 
 // Function to render upgrade buttons
@@ -65,7 +71,10 @@ function renderUpgradeButtons(gameManager) {
 
   for (const UpgradeName in gameManager.baseBuildingStats) {
     const stats = gameManager.getUpgradeStats(UpgradeName);
-
+    console.log(
+      `Rendering upgrade button for ${UpgradeName} with stats:`,
+      stats
+    );
     const btn = document.createElement("button");
     btn.textContent = `Upgrade ${UpgradeName}`;
     btn.className = "purchase-btn";
