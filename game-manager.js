@@ -1,6 +1,7 @@
 import { baseBuildingStats } from "./BaseStats.js";
 import { baseUpgrades } from "./BaseStats.js";
 
+// gamemanger explains the game logic and manages the state of the game
 export class GameManager {
   constructor() {
     this.baseBuildingStats = JSON.parse(JSON.stringify(baseBuildingStats));
