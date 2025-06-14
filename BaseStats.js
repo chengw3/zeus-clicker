@@ -35,18 +35,41 @@ export const baseBuildingStats = {
 export const baseUpgrades = [
   {
     id: "solar-boost-1",
-    cost: 100,
+    target: "SolarPanel",
+    scope: "building",
+    staticImpact: {
+      energy: -50,
+    },
     effect: {
       type: "multiply",
       path: ["variableImpact", "energy"],
       value: 1.5,
     },
-    target: "SolarPanel",
     description: "+50% solar panel energy",
   },
+
+  {
+    id: "free-solar-1",
+    target: "SolarPanel",
+    scope: "building",
+    staticImpact: {
+      energy: -50,
+    },
+    effect: {
+      type: "multiply",
+      path: ["staticImpact", "energy"],
+      value: 0, // effectively makes it free
+    },
+    description: "+50% solar panel energy",
+  },
+
   {
     id: "upgrade-discount",
-    cost: 200,
+    staticImpact: {
+      energy: -50,
+    },
+    target: null, // optional, explicitly marks as global
+    scope: "upgrade",
     effect: {
       type: "globalUpgradeDiscount", // special effect type, handled separately
       value: 0.75,

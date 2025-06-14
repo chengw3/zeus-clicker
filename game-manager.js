@@ -19,7 +19,7 @@ export class GameManager {
     );
 
     this.state = {
-      totalEnergy: 0,
+      totalEnergy: 500,
       totalCO2: 0,
       totalPeople: 0,
     };
@@ -48,42 +48,106 @@ export class GameManager {
     const effectiveStats = JSON.parse(JSON.stringify(base));
 
     // 2. Apply people-based multiplier to staticImpact
-    const staticMultiplier = 1 + (this.state.totalPeople * 0.01 || 0);
+    const staticMultiplier = 1 + this.state.totalPeople * 0.05;
+    console.log(
+      `Applying static multiplier of ${staticMultiplier} to building ${buildingName}.`
+    );
     for (const key in effectiveStats.staticImpact) {
       effectiveStats.staticImpact[key] *= staticMultiplier;
     }
 
     // 3. Apply upgrade effects
     for (const upgrade of this.purchasedUpgrades || []) {
+      //if the upgrade does not target this building, skip it
+      const isTargetedAtBuilding = upgrade.target === buildingName;
+      const isGlobalForBuildings =
+        (upgrade.target === null || upgrade.target === undefined) &&
+        (upgrade.scope === "building" || upgrade.scope === "all");
+
+      const isValidTarget = isTargetedAtBuilding || isGlobalForBuildings;
+
       if (
-        upgrade.target !== buildingName ||
+        !isValidTarget ||
         !upgrade.effect ||
         upgrade.effect.type !== "multiply" ||
         !Array.isArray(upgrade.effect.path)
       )
         continue;
 
-      let ref = effectiveStats;
+      // Traverse the path to find the correct reference
+      let ref = effectiveStats; // Start with the basestats object\
+      const type = upgrade.effect.type;
       const path = upgrade.effect.path;
-      for (let i = 0; i < path.length - 1; i++) {
-        if (!ref[path[i]]) {
-          console.warn(`Invalid upgrade path in ${upgrade.id}`);
-          continue;
-        }
-        ref = ref[path[i]];
-      }
+      const value = upgrade.effect.value;
 
-      const key = path[path.length - 1];
-      if (ref[key] !== undefined) {
-        ref[key] *= upgrade.effect.value;
-      }
+      if (!this.applyPathUpgrade(ref, path, value, type))
+        console.warn(
+          `Failed to apply upgrade ${upgrade.id} to building ${buildingName}`
+        );
     }
 
     return effectiveStats;
   }
 
   getUpgradeStats(UpgradeName) {
-    return upgradeStats;
+    const base = this.baseUpgrades.find(
+      (upgrade) => upgrade.id === UpgradeName
+    );
+    console.log("base", base);
+    if (!base) {
+      console.warn(`Upgrade ${UpgradeName} not found in base stats`);
+      return null;
+    }
+    // 1. Deep copy base stats to avoid mutation
+    const effectiveStats = JSON.parse(JSON.stringify(base));
+
+    // apply upgrade effects
+    for (const upgrade of this.purchasedUpgrades || []) {
+      //if the upgrade does not target this upgrade, skip it
+      if (
+        upgrade.target !== UpgradeName ||
+        !upgrade.effect ||
+        !Array.isArray(upgrade.effect.path)
+      )
+        continue;
+
+      // Traverse the path to find the correct reference
+      let ref = effectiveStats; // Start with the basestats object
+      const type = upgrade.effect.type;
+      const path = upgrade.effect.path;
+      const value = upgrade.effect.value;
+
+      if (!this.applyPathUpgrade(ref, path, value, type))
+        console.warn(
+          `Failed to apply upgrade ${upgrade.id} to upgrade ${UpgradeName}`
+        );
+    }
+    return effectiveStats;
+  }
+
+  applyPathUpgrade(targetObj, path, value, type = "multiply") {
+    let ref = targetObj;
+    for (let i = 0; i < path.length - 1; i++) {
+      if (!ref[path[i]]) return false;
+      ref = ref[path[i]];
+    }
+    const key = path[path.length - 1];
+    if (ref[key] === undefined) return false;
+
+    switch (type) {
+      case "multiply":
+        ref[key] *= value;
+        break;
+      case "add":
+        ref[key] += value;
+        break;
+      case "override":
+        ref[key] = value;
+        break;
+      default:
+        return false;
+    }
+    return true;
   }
 
   updateRates() {
@@ -159,7 +223,7 @@ export class GameManager {
   }
 
   purchaseUpgrade(UpgradeName) {
-    if (this.purchasedUpgrades.includes(UpgradeName)) {
+    if (this.purchasedUpgrades.has(UpgradeName)) {
       console.warn(`Upgrade ${UpgradeName} already purchased`);
       return;
     }

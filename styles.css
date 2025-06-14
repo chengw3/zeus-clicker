@@ -225,3 +225,17 @@ body {
   font-size: 1.2em;
   color: #388e3c;
 }
+
+.middle-split {
+  display: flex;
+  justify-content: center; /* horizontal center */
+  align-items: center;
+  gap: 1rem; /* optional spacing */
+}
+
+#left-half,
+#right-half {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc; /* optional visual aid */
+}

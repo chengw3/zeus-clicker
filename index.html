@@ -16,20 +16,36 @@
         <div id="time-counter" class="clickable-counter">
           ⏰ Time: <span id="time-count">0</span>
         </div>
-        <div id="co2-counter" class="clickable-counter">
-          CO₂: <span id="co2-count">0</span>
-        </div>
         <div id="energy-counter" class="clickable-counter">
-          Energy: <span id="energy-count">0</span>
+          ⚡ Energy: <span id="energy-count">0</span>
+        </div>
+        <div id="co2-counter" class="clickable-counter">
+          🌫️ CO₂: <span id="co2-count">0</span>
         </div>
       </div>
       <div id="middle" class="middle wrapper">
-        <div id="building-display"></div>
+        <div id="middle-title" class="title" style="display: block">
+          MIDDLE TITLE
+        </div>
+
+        <div class="middle-split">
+          <div class="left-half">
+            <div id="building-display"></div>
+            <div id="people-display"></div>
+          </div>
+          <div class="right-half">
+            <div id="stats" class="title" style="display: block">
+              this.Stats: game.RATE
+            <div id="stats-display" class="list-box"></div>
+            <div id="stats-display2" class="list-box"></div>
+          </div>
+        </div>
+      </div>
       </div>
       <div class="bottom">
         <div class="bottom-box bordered">
           <div id="build-title" class="title" style="display: block">
-            Buildings
+            Buildings Purchases
           </div>
           <div id="build-buttons" style="display: block"></div>
         </div>
@@ -39,15 +55,14 @@
         </div>
         <div class="bottom-box bordered">
           <div id="build-title" class="title" style="display: block">
-            Upgrades
+            Upgrade Purchases
           </div>
-          <div id="upgrade-buttons" style="display: block"></div>
+          <div id="available-upgrade-buttons" style="display: block"></div>
+          <div id="purchased-upgrade-buttons" style="display: block"></div>
         </div>
       </div>
-    </div>
 
     <!-- <script src="popup.js"></script> -->
-    <script src="create-buttons.js"></script>
     <script type="module" src="main.js"></script>
   </body>
 </html>
