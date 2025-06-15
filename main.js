@@ -30,7 +30,7 @@ function updateUI(game) {
   const rate = game.rate;
   const rateStr = `⚡ Energy: ${Math.floor(rate.energy)} | 🌫️ CO₂: ${Math.floor(
     rate.CO2
-  )} | 👥 People: ${Math.floor(rate.people)}`;
+  )} | 👥 People: ${Math.floor(rate.people)} | availableU: ${Array.from(game.availableUpgradesNames).join(", ")} | purchasedU: ${Array.from(game.purchasedUpgradesNames).join(", ")}`;
   document.getElementById("stats-display2").textContent = rateStr;
 
   // Format time as HH:MM:SS

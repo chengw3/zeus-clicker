@@ -6,10 +6,11 @@ export class GameManager {
   constructor() {
     this.baseBuildingStats = JSON.parse(JSON.stringify(baseBuildingStats));
     this.baseUpgrades = JSON.parse(JSON.stringify(baseUpgrades));
-    this.availableUpgrades = new Set(
+    this.availableUpgradesNames = new Set(
       this.baseUpgrades.map((upgrade) => upgrade.id)
     );
-    this.purchasedUpgrades = new Set();
+    console.log(this.availableUpgradesNames)
+    this.purchasedUpgradesNames = new Set();
     this.elapsedTime = 0;
     this.buildingCount = Object.keys(this.baseBuildingStats).reduce(
       (acc, key) => {
@@ -50,15 +51,15 @@ export class GameManager {
 
     // 2. Apply people-based multiplier to staticImpact
     const staticMultiplier = 1 + this.state.totalPeople * 0.05;
-    console.log(
-      `Applying static multiplier of ${staticMultiplier} to building ${buildingName}.`
-    );
+    // console.log(
+    //   `Applying static multiplier of ${staticMultiplier} to building ${buildingName}.`
+    // );
     for (const key in effectiveStats.staticImpact) {
       effectiveStats.staticImpact[key] *= staticMultiplier;
     }
 
     // 3. Apply upgrade effects
-    for (const upgrade of this.purchasedUpgrades || []) {
+    for (const upgrade of this.purchasedUpgradesNames || []) {
       //if the upgrade does not target this building, skip it
       const isTargetedAtBuilding = upgrade.target === buildingName;
       const isGlobalForBuildings =
@@ -94,7 +95,6 @@ export class GameManager {
     const base = this.baseUpgrades.find(
       (upgrade) => upgrade.id === UpgradeName
     );
-    console.log("base", base);
     if (!base) {
       console.warn(`Upgrade ${UpgradeName} not found in base stats`);
       return null;
@@ -103,8 +103,10 @@ export class GameManager {
     const effectiveStats = JSON.parse(JSON.stringify(base));
 
     // apply upgrade effects
-    for (const upgrade of this.purchasedUpgrades || []) {
+    for (const upgradeName of this.purchasedUpgradesNames || []) {
       //if the upgrade does not target this upgrade, skip it
+      const upgrade = this.baseUpgrades.find(u => u.id === upgradeName);
+      console.log(this.baseUpgrades)
       if (
         upgrade.target !== UpgradeName ||
         !upgrade.effect ||
@@ -177,7 +179,7 @@ export class GameManager {
   }
 
   tick(deltaTime = 1) {
-    console.log("tick", game.elapsedTime);
+    // console.log("tick", game.elapsedTime);
     // --- Recalculate rates ---
     this.updateRates;
     this.elapsedTime += deltaTime;
@@ -224,7 +226,7 @@ export class GameManager {
   }
 
   purchaseUpgrade(UpgradeName) {
-    if (this.purchasedUpgrades.has(UpgradeName)) {
+    if (this.purchasedUpgradesNames.has(UpgradeName)) {
       console.warn(`Upgrade ${UpgradeName} already purchased`);
       return;
     }
@@ -234,9 +236,9 @@ export class GameManager {
       return;
     }
 
-    if (this.availableUpgrades.has(UpgradeName)) {
-      this.availableUpgrades.delete(UpgradeName);
-      this.purchasedUpgrades.add(UpgradeName);
+    if (this.availableUpgradesNames.has(UpgradeName)) {
+      this.availableUpgradesNames.delete(UpgradeName);
+      this.purchasedUpgradesNames.add(UpgradeName);
     }
   }
 }

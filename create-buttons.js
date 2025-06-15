@@ -53,8 +53,11 @@ export function renderUpgradeButtons(gameManager) {
   );
   available_container.innerHTML = ""; // clear old buttons
   purchased_container.innerHTML = ""; // clear old buttons
+
+
   for (const Upgrade of gameManager.baseUpgrades) {
     const upgradename = Upgrade.id;
+    console.log(upgradename)
     const stats = gameManager.getUpgradeStats(upgradename);
 
     const btn = document.createElement("button");
@@ -62,13 +65,14 @@ export function renderUpgradeButtons(gameManager) {
     btn.className = "purchase-btn";
 
     // Check if the upgrade has already been purchased
-    if (upgradename in gameManager.purchasedUpgrades) {
+    if (gameManager.purchasedUpgradesNames.has(upgradename)) {
       // If the upgrade has already been purchased, render it in the purchased section
       btn.textContent = `Purchased: ${upgradename}`;
       btn.disabled = true; // Disable button since it's already purchased
       btn.classList.add("purchased"); // add CSS to style it differently
       purchased_container.appendChild(btn);
       continue; // Skip to next upgrade
+      console.log("ALREADY PURCHASED")
     }
 
     // If the upgrade is available for purchase, render it in the available section

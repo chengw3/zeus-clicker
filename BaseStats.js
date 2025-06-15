@@ -60,7 +60,7 @@ export const baseUpgrades = [
       path: ["staticImpact", "energy"],
       value: 0, // effectively makes it free
     },
-    description: "+50% solar panel energy",
+    description: "FREE solar panel energy",
   },
 
   {
