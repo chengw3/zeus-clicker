@@ -11,8 +11,10 @@
       <div class="top">
         <!-- Trigger -->
         <div id="people-counter" class="clickable-counter">
-          👥 People: <span id="people-count">0</span>
+          👥 People: <span id="people-count">0</span>/<span id="people-cap">0</span>
         </div>
+        <div id="people-cap-warning" class="warning">🚫 Max housing reached!</div>
+
         <div id="time-counter" class="clickable-counter">
           ⏰ Time: <span id="time-count">0</span>
         </div>
@@ -55,10 +57,19 @@
         </div>
         <div class="bottom-box bordered">
           <div id="build-title" class="title" style="display: block">
-            Upgrade Purchases
+            Available Purchases
           </div>
           <div id="available-upgrade-buttons" style="display: block"></div>
+          <div id="build-title" class="title" style="display: block">
+            Purchased Purchases
+          </div>
           <div id="purchased-upgrade-buttons" style="display: block"></div>
+        </div>
+      </div>
+      <div id="tutorial-overlay" class="popup-overlay">
+        <div class="popup-box">
+          <p id="tutorial-text">Welcome to the game!</p>
+          <button id="next-tutorial-btn">Next</button>
         </div>
       </div>
 

@@ -5,18 +5,26 @@ import {
   renderUpgradeButtons,
 } from "./create-buttons.js";
 
-window.game = new GameManager();
-renderBuildButtons(game); // Update the build buttons UI
-renderBuildings(game); // Update the building display UI
-renderUpgradeButtons(game); // Update the upgrade buttons UI
+import { startTutorial } from "./tutorial.js";
 
-setInterval(() => {
-  game.tick(1); // Simulates 1 second passing
-  updateUI(game); // Optional: refresh HTML with latest values
-  renderBuildButtons(game); // Update the build buttons UI
-  renderBuildings(game); // Update the building display UI
-  renderUpgradeButtons(game); // Update the upgrade buttons UI
-}, 1000); // every 1000 ms = 1 second
+window.addEventListener("DOMContentLoaded", () => {
+  window.game = new GameManager();
+
+  renderBuildButtons(game);
+  renderBuildings(game);
+  renderUpgradeButtons(game);
+
+  startTutorial(game, () => {
+    // 🕐 Start ticking only after tutorial is done
+    setInterval(() => {
+      game.tick(1);
+      updateUI(game);
+      renderBuildButtons(game);
+      renderBuildings(game);
+      renderUpgradeButtons(game);
+    }, 1000);
+  });
+});
 
 function updateUI(game) {
   document.getElementById("energy-count").textContent = Math.floor(
@@ -26,11 +34,14 @@ function updateUI(game) {
     game.state.totalCO2
   );
   document.getElementById("people-count").textContent = game.state.totalPeople;
+  document.getElementById("people-cap").textContent = game.cap.people;
 
   const rate = game.rate;
   const rateStr = `⚡ Energy: ${Math.floor(rate.energy)} | 🌫️ CO₂: ${Math.floor(
     rate.CO2
-  )} | 👥 People: ${Math.floor(rate.people)} | availableU: ${Array.from(game.availableUpgradesNames).join(", ")} | purchasedU: ${Array.from(game.purchasedUpgradesNames).join(", ")}`;
+  )} | 👥 People: ${Math.floor(rate.people)} | availableU: ${Array.from(
+    game.availableUpgradesNames
+  ).join(", ")} | hiddenCO2Cap: ${game.getDynamicCO2Limit().toFixed(2)}`;
   document.getElementById("stats-display2").textContent = rateStr;
 
   // Format time as HH:MM:SS
@@ -47,17 +58,28 @@ function updateUI(game) {
   ).textContent = `${hours}:${minutes}:${seconds}`;
 }
 
-// create spawn people button
 const addPeopleButton = document.getElementById("add-people");
-//click to spawn person
+
 addPeopleButton.addEventListener("click", () => {
-  game.state.totalPeople += 1;
+  const result = game.addPerson();
 
-  // // Create a new person element
-  // const person = document.createElement("div");
-  // person.className = "person";
-  // person.textContent = `Person ${game.state.totalPeople}`;
+  if (!result.success) {
+    if (result.reason === "cap_reached") {
+      showPeopleCapWarning(); // brief red flash or tooltip
+    }
+    return;
+  }
 
-  // // Append the new person to the container
-  // document.getElementById("middle").appendChild(person);
+  updateUI(game);
 });
+
+// Show a brief warning when people cap is reached
+// This function will flash a warning message or change the button color briefly
+function showPeopleCapWarning() {
+  console.log("People cap reached, cannot add more.");
+  const el = document.getElementById("people-cap-warning");
+  if (!el) return;
+
+  el.classList.add("visible");
+  setTimeout(() => el.classList.remove("visible"), 1500);
+}

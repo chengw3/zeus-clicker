@@ -9,7 +9,7 @@ export class GameManager {
     this.availableUpgradesNames = new Set(
       this.baseUpgrades.map((upgrade) => upgrade.id)
     );
-    console.log(this.availableUpgradesNames)
+    console.log(this.availableUpgradesNames);
     this.purchasedUpgradesNames = new Set();
     this.elapsedTime = 0;
     this.buildingCount = Object.keys(this.baseBuildingStats).reduce(
@@ -29,7 +29,7 @@ export class GameManager {
     this.cap = {
       energy: 1000, // Example cap for energy
       CO2: 500, // Example cap for CO2
-      people: 100, // Example cap for people
+      people: 10, // Example cap for people
     };
 
     this.rate = {
@@ -37,61 +37,64 @@ export class GameManager {
       CO2: 0,
       people: 0,
     };
+
+    this.warningTriggered = false;
+    this.explosionTimer = null;
   }
 
+  getEffectiveStats(targetId, type = "building") {
+    const isBuilding = type === "building";
+    const base = isBuilding
+      ? this.baseBuildingStats?.[targetId]
+      : this.baseUpgrades?.find((u) => u.id === targetId);
 
-getEffectiveStats(targetId, type = "building") {
-  const isBuilding = type === "building";
-  const base = isBuilding
-    ? this.baseBuildingStats?.[targetId]
-    : this.baseUpgrades?.find(u => u.id === targetId);
-
-  if (!base) {
-    console.warn(`${type} '${targetId}' not found in base stats`);
-    return null;
-  }
-
-  // 1. Deep copy base stats to avoid mutation
-  const effectiveStats = JSON.parse(JSON.stringify(base));
-
-  // 2. Optional: apply people-based multiplier to staticImpact for buildings
-  if (isBuilding && effectiveStats.staticImpact) {
-    const staticMultiplier = 1 + this.state.totalPeople * 0.05;
-    for (const key in effectiveStats.staticImpact) {
-      effectiveStats.staticImpact[key] *= staticMultiplier;
+    if (!base) {
+      console.warn(`${type} '${targetId}' not found in base stats`);
+      return null;
     }
-  }
 
-  // 3. Apply relevant upgrades
-  const purchased = this.purchasedUpgradesNames ?? [];
-  for (const name of purchased) {
-    const upgrade = this.baseUpgrades.find(u => u.id === name);
-    if (!upgrade || !upgrade.effect) continue;
+    // 1. Deep copy base stats to avoid mutation
+    const effectiveStats = JSON.parse(JSON.stringify(base));
 
-    const isTargetedAtEntity = upgrade.target === targetId;
-    const isGlobalForType =
-      (upgrade.target === null || upgrade.target === undefined) &&
-      (upgrade.scope === type || upgrade.scope === "all");
-
-    const shouldApply = isTargetedAtEntity || isGlobalForType;
-
-    if (
-      !shouldApply ||
-      upgrade.effect.type !== "multiply" ||
-      !Array.isArray(upgrade.effect.path)
-    )
-      continue;
-
-    const { path, value, type: effectType } = upgrade.effect;
-
-    if (!this.applyPathUpgrade(effectiveStats, path, value, effectType)) {
-      console.warn(`Failed to apply upgrade ${upgrade.id} to ${type} ${targetId}`);
+    // 2. Optional: apply people-based multiplier to staticImpact for buildings
+    if (isBuilding && effectiveStats.staticImpact) {
+      const staticMultiplier = 1 + this.state.totalPeople * 0.05;
+      for (const key in effectiveStats.staticImpact) {
+        effectiveStats.staticImpact[key] *= staticMultiplier;
+      }
     }
+
+    // 3. Apply relevant upgrades
+    const purchased = this.purchasedUpgradesNames ?? [];
+    for (const name of purchased) {
+      const upgrade = this.baseUpgrades.find((u) => u.id === name);
+      if (!upgrade || !upgrade.effect) continue;
+
+      const isTargetedAtEntity = upgrade.target === targetId;
+      const isGlobalForType =
+        (upgrade.target === null || upgrade.target === undefined) &&
+        (upgrade.scope === type || upgrade.scope === "all");
+
+      const shouldApply = isTargetedAtEntity || isGlobalForType;
+
+      if (
+        !shouldApply ||
+        upgrade.effect.type !== "multiply" ||
+        !Array.isArray(upgrade.effect.path)
+      )
+        continue;
+
+      const { path, value, type: effectType } = upgrade.effect;
+
+      if (!this.applyPathUpgrade(effectiveStats, path, value, effectType)) {
+        console.warn(
+          `Failed to apply upgrade ${upgrade.id} to ${type} ${targetId}`
+        );
+      }
+    }
+
+    return effectiveStats;
   }
-
-  return effectiveStats;
-}
-
 
   applyPathUpgrade(targetObj, path, value, type = "multiply") {
     let ref = targetObj;
@@ -133,24 +136,35 @@ getEffectiveStats(targetId, type = "building") {
       }
     }
 
-    CO2Rate += this.state.totalPeople * 0.1; // CO2 from people
-    peopleRate += this.state.totalPeople * 0.05; // People rate from existing people
-    // // Apply caps
-    // energyRate = Math.min(energyRate, this.cap.energy);
+    CO2Rate += this.state.totalPeople * 0.1;
+
+    // ⛔ disabled for now
+    // peopleRate += this.state.totalPeople * 0.05;
 
     this.rate.energy = energyRate;
     this.rate.CO2 = CO2Rate;
-    this.rate.people = peopleRate;
+    this.rate.people = 0;
   }
 
   tick(deltaTime = 1) {
-    // console.log("tick", game.elapsedTime);
-    // --- Recalculate rates ---
-    this.updateRates;
+    this.updateRates(); // <- invoke the method
     this.elapsedTime += deltaTime;
-    // --- Update totals ---
+    this.state.totalPeople += this.rate.people * deltaTime || 0;
+    this.state.totalPeople = Math.min(this.state.totalPeople, this.cap.people);
+
     this.state.totalEnergy += this.rate.energy * deltaTime || 0;
     this.state.totalCO2 += this.rate.CO2 * deltaTime || 0;
+
+    this.handleCO2Collapse(deltaTime);
+  }
+
+  addPerson() {
+    if (this.state.totalPeople >= this.cap.people) {
+      return { success: false, reason: "cap_reached" };
+    }
+
+    this.state.totalPeople += 1;
+    return { success: true };
   }
 
   getState() {
@@ -205,5 +219,43 @@ getEffectiveStats(targetId, type = "building") {
       this.availableUpgradesNames.delete(UpgradeName);
       this.purchasedUpgradesNames.add(UpgradeName);
     }
+  }
+  handleCO2Collapse(deltaTime) {
+    const dynamicLimit = this.state.totalPeople * 5; // tweak as needed
+    const currentCO2 = this.state.totalCO2;
+
+    if (currentCO2 > dynamicLimit && !this.warningTriggered) {
+      this.warningTriggered = true;
+      this.explosionTimer = Math.random() * 40 + 20;
+      this.flashCO2UI(true);
+    }
+
+    if (this.warningTriggered) {
+      this.explosionTimer -= deltaTime;
+
+      if (currentCO2 <= dynamicLimit) {
+        this.warningTriggered = false;
+        this.explosionTimer = null;
+        this.flashCO2UI(false);
+      } else if (this.explosionTimer <= 0) {
+        this.triggerGameOver();
+      }
+    }
+  }
+
+  getDynamicCO2Limit() {
+    return this.state.totalPeople * 5;
+  }
+
+  flashCO2UI(shouldFlash) {
+    const counterEl = document.getElementById("co2-counter");
+    if (counterEl) {
+      counterEl.classList.toggle("flashing", shouldFlash);
+    }
+  }
+
+  triggerGameOver() {
+    alert("🌍 Collapse triggered due to unchecked emissions.");
+    // TODO: replace with proper game reset or end screen
   }
 }

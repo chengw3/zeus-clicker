@@ -239,3 +239,53 @@ body {
   padding: 0.5rem;
   border: 1px solid #ccc; /* optional visual aid */
 }
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popup-box {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  max-width: 400px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+
+  /* Add this line 👇 */
+  border: 3px solid white;
+}
+
+.hidden {
+  display: none;
+}
+
+.warning {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.warning.visible {
+  opacity: 1;
+  color: red;
+}
+
+.flashing {
+  animation: flashRed 0.5s infinite alternate;
+}
+@keyframes flashRed {
+  from {
+    color: red;
+  }
+  to {
+    color: darkred;
+  }
+}
