@@ -39,94 +39,59 @@ export class GameManager {
     };
   }
 
-  getBuildingStats(buildingName) {
-    const base = this.baseBuildingStats[buildingName];
-    if (!base) {
-      console.warn(`Building ${buildingName} not found in base stats`);
-      return null;
-    }
 
-    // 1. Deep copy base stats to avoid mutation
-    const effectiveStats = JSON.parse(JSON.stringify(base));
+getEffectiveStats(targetId, type = "building") {
+  const isBuilding = type === "building";
+  const base = isBuilding
+    ? this.baseBuildingStats?.[targetId]
+    : this.baseUpgrades?.find(u => u.id === targetId);
 
-    // 2. Apply people-based multiplier to staticImpact
+  if (!base) {
+    console.warn(`${type} '${targetId}' not found in base stats`);
+    return null;
+  }
+
+  // 1. Deep copy base stats to avoid mutation
+  const effectiveStats = JSON.parse(JSON.stringify(base));
+
+  // 2. Optional: apply people-based multiplier to staticImpact for buildings
+  if (isBuilding && effectiveStats.staticImpact) {
     const staticMultiplier = 1 + this.state.totalPeople * 0.05;
-    // console.log(
-    //   `Applying static multiplier of ${staticMultiplier} to building ${buildingName}.`
-    // );
     for (const key in effectiveStats.staticImpact) {
       effectiveStats.staticImpact[key] *= staticMultiplier;
     }
-
-    // 3. Apply upgrade effects
-    for (const upgrade of this.purchasedUpgradesNames || []) {
-      //if the upgrade does not target this building, skip it
-      const isTargetedAtBuilding = upgrade.target === buildingName;
-      const isGlobalForBuildings =
-        (upgrade.target === null || upgrade.target === undefined) &&
-        (upgrade.scope === "building" || upgrade.scope === "all");
-
-      const isValidTarget = isTargetedAtBuilding || isGlobalForBuildings;
-
-      if (
-        !isValidTarget ||
-        !upgrade.effect ||
-        upgrade.effect.type !== "multiply" ||
-        !Array.isArray(upgrade.effect.path)
-      )
-        continue;
-
-      // Traverse the path to find the correct reference
-      let ref = effectiveStats; // Start with the basestats object\
-      const type = upgrade.effect.type;
-      const path = upgrade.effect.path;
-      const value = upgrade.effect.value;
-
-      if (!this.applyPathUpgrade(ref, path, value, type))
-        console.warn(
-          `Failed to apply upgrade ${upgrade.id} to building ${buildingName}`
-        );
-    }
-
-    return effectiveStats;
   }
 
-  getUpgradeStats(UpgradeName) {
-    const base = this.baseUpgrades.find(
-      (upgrade) => upgrade.id === UpgradeName
-    );
-    if (!base) {
-      console.warn(`Upgrade ${UpgradeName} not found in base stats`);
-      return null;
+  // 3. Apply relevant upgrades
+  const purchased = this.purchasedUpgradesNames ?? [];
+  for (const name of purchased) {
+    const upgrade = this.baseUpgrades.find(u => u.id === name);
+    if (!upgrade || !upgrade.effect) continue;
+
+    const isTargetedAtEntity = upgrade.target === targetId;
+    const isGlobalForType =
+      (upgrade.target === null || upgrade.target === undefined) &&
+      (upgrade.scope === type || upgrade.scope === "all");
+
+    const shouldApply = isTargetedAtEntity || isGlobalForType;
+
+    if (
+      !shouldApply ||
+      upgrade.effect.type !== "multiply" ||
+      !Array.isArray(upgrade.effect.path)
+    )
+      continue;
+
+    const { path, value, type: effectType } = upgrade.effect;
+
+    if (!this.applyPathUpgrade(effectiveStats, path, value, effectType)) {
+      console.warn(`Failed to apply upgrade ${upgrade.id} to ${type} ${targetId}`);
     }
-    // 1. Deep copy base stats to avoid mutation
-    const effectiveStats = JSON.parse(JSON.stringify(base));
-
-    // apply upgrade effects
-    for (const upgradeName of this.purchasedUpgradesNames || []) {
-      //if the upgrade does not target this upgrade, skip it
-      const upgrade = this.baseUpgrades.find(u => u.id === upgradeName);
-      console.log(this.baseUpgrades)
-      if (
-        upgrade.target !== UpgradeName ||
-        !upgrade.effect ||
-        !Array.isArray(upgrade.effect.path)
-      )
-        continue;
-
-      // Traverse the path to find the correct reference
-      let ref = effectiveStats; // Start with the basestats object
-      const type = upgrade.effect.type;
-      const path = upgrade.effect.path;
-      const value = upgrade.effect.value;
-
-      if (!this.applyPathUpgrade(ref, path, value, type))
-        console.warn(
-          `Failed to apply upgrade ${upgrade.id} to upgrade ${UpgradeName}`
-        );
-    }
-    return effectiveStats;
   }
+
+  return effectiveStats;
+}
+
 
   applyPathUpgrade(targetObj, path, value, type = "multiply") {
     let ref = targetObj;
@@ -160,7 +125,7 @@ export class GameManager {
 
     for (const buildingName in this.buildingCount) {
       const count = this.buildingCount[buildingName];
-      const stats = this.getBuildingStats(buildingName);
+      const stats = this.getEffectiveStats(buildingName, "building");
       if (stats) {
         energyRate += stats.variableImpact?.energy * count || 0;
         CO2Rate += stats.variableImpact?.CO2 * count || 0;
@@ -216,7 +181,7 @@ export class GameManager {
 
   purchaseBuilding(buildingName) {
     /*assumes you can build already */
-    const stats = this.getBuildingStats(buildingName);
+    const stats = this.getEffectiveStats(buildingName, "building");
     this.state.totalEnergy += stats.staticImpact.energy;
     this.state.totalCO2 += stats.staticImpact.CO2;
     this.buildingCount[buildingName] += 1;
@@ -230,7 +195,7 @@ export class GameManager {
       console.warn(`Upgrade ${UpgradeName} already purchased`);
       return;
     }
-    const stats = this.getUpgradeStats(UpgradeName);
+    const stats = this.getEffectiveStats(UpgradeName, "upgrade");
     if (!stats) {
       console.warn(`Upgrade ${UpgradeName} not found`);
       return;

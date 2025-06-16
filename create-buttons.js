@@ -11,7 +11,7 @@ export function renderBuildButtons(gameManager) {
   container.innerHTML = ""; // clear old buttons
 
   for (const buildingName in gameManager.baseBuildingStats) {
-    const buildingStats = gameManager.getBuildingStats(buildingName);
+    const buildingStats = gameManager.getEffectiveStats(buildingName, "building");
 
     const impact = buildingStats.staticImpact || {};
     const energyCost = -impact.energy ?? 0;
@@ -58,7 +58,7 @@ export function renderUpgradeButtons(gameManager) {
   for (const Upgrade of gameManager.baseUpgrades) {
     const upgradename = Upgrade.id;
     console.log(upgradename)
-    const stats = gameManager.getUpgradeStats(upgradename);
+    const stats = gameManager.getEffectiveStats(upgradename, "upgrade");
 
     const btn = document.createElement("button");
     btn.textContent = `Upgrade ${upgradename}`;
