@@ -28,12 +28,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
 function updateUI(game) {
   document.getElementById("energy-count").textContent = Math.floor(
-    game.state.totalEnergy
+    game.state.energy
   );
-  document.getElementById("co2-count").textContent = Math.floor(
-    game.state.totalCO2
-  );
-  document.getElementById("people-count").textContent = game.state.totalPeople;
+  document.getElementById("co2-count").textContent = Math.floor(game.state.C02);
+  document.getElementById("people-count").textContent = game.state.people;
   document.getElementById("people-cap").textContent = game.cap.people;
 
   const rate = game.rate;
