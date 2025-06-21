@@ -1,8 +1,14 @@
 import { GameManager } from "./game-manager.js";
 import {
-  renderBuildButtons,
-  renderBuildings,
-  renderUpgradeButtons,
+  initAssetsVisuals,
+  initBuildButtons,
+  initUpgradeButtons,
+  initMetadata,
+  updateAssetsVisuals,
+  updateBuildButtonStates,
+  updateUpgradeButtonStates,
+  updateMetadata,
+  updateTopBar,
 } from "./create-buttons.js";
 
 import { startTutorial } from "./tutorial.js";
@@ -10,54 +16,25 @@ import { startTutorial } from "./tutorial.js";
 window.addEventListener("DOMContentLoaded", () => {
   window.game = new GameManager();
 
-  renderBuildButtons(game);
-  renderBuildings(game);
-  renderUpgradeButtons(game);
-
   startTutorial(game, () => {
-    // 🕐 Start ticking only after tutorial is done
+    initBuildButtons(game);
+    initUpgradeButtons(game);
+    initAssetsVisuals(game);
+    initMetadata(game);
+
     setInterval(() => {
-      game.tick(0.1);
+      game.tick(0.01);
       updateUI(game);
-      renderBuildButtons(game);
-      renderBuildings(game);
-      renderUpgradeButtons(game);
-    }, 100);
+    }, 10);
   });
 });
 
 function updateUI(game) {
-  document.getElementById("people-count").textContent = game.state.people;
-  document.getElementById("people-cap").textContent = game.cap.people;
-  document.getElementById("energy-count").textContent = Math.floor(
-    game.state.energy
-  );
-  document.getElementById("energy-cap").textContent = Math.floor(
-    game.cap.energy
-  );
-  document.getElementById("CO2-count").textContent = Math.floor(game.state.CO2);
-  document.getElementById("CO2-cap").textContent = Math.floor(game.cap.CO2);
-
-  const rate = game.rate;
-  const rateStr = `⚡ Energy: ${Math.floor(rate.energy)} | 🌫️ CO₂: ${Math.floor(
-    rate.CO2
-  )} | 👥 People: ${Math.floor(rate.people)} | availableU: ${Array.from(
-    game.availableUpgradesNames
-  ).join(", ")} | hiddenCO2Cap: ${game.getDynamicCO2Limit().toFixed(2)}`;
-  document.getElementById("stats-display2").textContent = rateStr;
-
-  // Format time as HH:MM:SS
-  const totalSeconds = Math.floor(game.elapsedTime);
-  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
-    2,
-    "0"
-  );
-  const seconds = String(totalSeconds % 60).padStart(2, "0");
-
-  document.getElementById(
-    "time-count"
-  ).textContent = `${hours}:${minutes}:${seconds}`;
+  updateTopBar(game);
+  updateAssetsVisuals(game);
+  updateBuildButtonStates(game);
+  updateUpgradeButtonStates(game);
+  updateMetadata(game);
 }
 
 const addPeopleButton = document.getElementById("add-people");

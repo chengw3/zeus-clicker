@@ -1,0 +1,74 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3-Layer Div Layout</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="top">
+        <div id="time-counter" class="clickable-counter">
+          ⏰ Time: <span id="time-count">0</span>
+        </div>
+        <!-- Trigger -->
+                        <div id="people-counter" class="clickable-counter">
+          👥 People: <span id="people-count">0</span>/<span id="people-cap">0</span>
+                </div>
+        <div id="energy-counter" class="clickable-counter">
+          ⚡ Energy: <span id="energy-count">0</span>/<span id="energy-cap">0</span>
+        </div>
+        <div id="CO2-counter" class="clickable-counter">
+          🌫️ CO₂: <span id="CO2-count">0</span>/<span id="CO2-cap">?</span>
+        </div>
+      </div>
+      <div id="middle" class="middle wrapper">
+        
+
+        <div class="middle-split">
+          <div class="left-half">
+            <div id="building-display"></div>
+            <div id="people-display"></div>
+          </div>
+          <div class="right-half">
+            <div id="stats" class="title" style="display: block">
+              METADATA
+            </div>
+            <div id="metadata-display" class="list-box"></div>
+        </div>
+      </div>
+      </div>
+      <div class="bottom">
+        <div class="bottom-box bordered">
+          <div id="build-title" class="title" style="display: block">
+            Buildings Purchases
+          </div>
+          <div id="build-buttons" class="button-container"></div>
+        </div>
+
+        <div class="bottom-box bordered">
+          <button id="add-people" class="button-circle">🧍</button>
+          <div id="people-cap-warning" class="warning">🚫 Max housing reached!</div>
+        </div>
+        <div class="bottom-box bordered">
+          <div id="build-title" class="title" style="display: block">
+            Available Purchases
+          </div>
+          <div id="available-upgrade-buttons" class="button-container"></div>
+          <div id="build-title" class="title" style="display: block">
+            Purchased Purchases
+          </div>
+          <div id="purchased-upgrade-buttons" class="button-container"></div>
+        </div>
+      </div>
+      <div id="tutorial-overlay" class="popup-overlay">
+        <div class="popup-box">
+          <p id="tutorial-text">Welcome to the game!</p>
+          <button id="next-tutorial-btn">Next</button>
+        </div>
+      </div>
+
+    <!-- <script src="popup.js"></script> -->
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

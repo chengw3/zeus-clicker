@@ -119,7 +119,7 @@ export class GameManager {
         isHard: true,
       },
       {
-        key: "totalPeople",
+        key: "people",
         capKey: "people",
         elementId: "people-counter",
         isHard: true,
@@ -151,12 +151,10 @@ export class GameManager {
   updateRates() {
     let energyRate = 0;
     let CO2Rate = 0;
-    console.log("Building Count:", this.buildingCount);
     for (const [id, count] of Object.entries(this.buildingCount)) {
       if (count <= 0) continue;
 
       const stats = this.getEffectiveEntity(id, "building");
-      console.log("Stats for", id, stats);
       if (!stats?.rate) continue;
 
       energyRate += (stats.rate.energy || 0) * count;
@@ -168,11 +166,12 @@ export class GameManager {
     // Preserve existing people rate
     this.rate.energy = energyRate;
     this.rate.CO2 = CO2Rate;
-    console.log("Updated rates:", this.rate);
   }
 
   tick(deltaTime) {
     this.elapsedTime += deltaTime;
+    this.cap.CO2 = Math.max(this.getDynamicCO2Limit(), 500);
+    console.log(deltaTime, this.elapsedTime);
     this.state.energy += this.rate.energy * deltaTime;
     this.state.CO2 += this.rate.CO2 * deltaTime;
     this.updateRates();
@@ -182,14 +181,14 @@ export class GameManager {
 
   canBuy(effectiveEntity) {
     if (!effectiveEntity?.cost) {
-      console.log("no cost parameter");
       return false;
     }
     for (const [resource, cost] of Object.entries(effectiveEntity.cost)) {
       const available = this.state[resource];
-      console.log(`Checking ${resource}: available=${available}, cost=${cost}`);
       if (available === undefined || available < cost) {
-        console.log("no cost param 2");
+        console.warn(
+          `⚠️ Not enough "${resource}" to purchase "${effectiveEntity.id}"`
+        );
         return false;
       }
     }
@@ -248,6 +247,17 @@ export class GameManager {
     return { success: true };
   }
 
+  triggerCO2Warning() {
+    const baseTime = 30; // base seconds before collapse
+    const people = this.state.people || 0;
+
+    // For example: more people → faster collapse
+    const timer = baseTime - Math.min(people * 0.1, 25); // min 5s left if 250+ people
+
+    this.warningTriggered = true;
+    this.explosionTimer = Math.max(timer, 3); // never go below 3 seconds
+  }
+
   handleCO2Collapse(deltaTime) {
     const limit = this.getDynamicCO2Limit();
     const currentCO2 = this.state.CO2;
@@ -270,7 +280,7 @@ export class GameManager {
   }
 
   getDynamicCO2Limit() {
-    return this.state.people * 5;
+    return this.state.people * 500;
   }
 
   triggerGameOver() {
