@@ -9,20 +9,18 @@
   <body>
     <div class="container">
       <div class="top">
+        <div id="time-counter" class="clickable-counter">
+          ⏰ Time: <span id="time-count">0</span>
+        </div>
         <!-- Trigger -->
         <div id="people-counter" class="clickable-counter">
           👥 People: <span id="people-count">0</span>/<span id="people-cap">0</span>
         </div>
-        <div id="people-cap-warning" class="warning">🚫 Max housing reached!</div>
-
-        <div id="time-counter" class="clickable-counter">
-          ⏰ Time: <span id="time-count">0</span>
-        </div>
         <div id="energy-counter" class="clickable-counter">
-          ⚡ Energy: <span id="energy-count">0</span>
+          ⚡ Energy: <span id="energy-count">0</span>/<span id="energy-cap">0</span>
         </div>
-        <div id="co2-counter" class="clickable-counter">
-          🌫️ CO₂: <span id="co2-count">0</span>
+        <div id="CO2-counter" class="clickable-counter">
+          🌫️ CO₂: <span id="CO2-count">0</span>/<span id="CO2-cap">?</span>
         </div>
       </div>
       <div id="middle" class="middle wrapper">
@@ -49,21 +47,22 @@
           <div id="build-title" class="title" style="display: block">
             Buildings Purchases
           </div>
-          <div id="build-buttons" style="display: block"></div>
+          <div id="build-buttons" class="button-container"></div>
         </div>
 
         <div class="bottom-box bordered">
           <button id="add-people" class="button-circle">🧍</button>
+          <div id="people-cap-warning" class="warning">🚫 Max housing reached!</div>
         </div>
         <div class="bottom-box bordered">
           <div id="build-title" class="title" style="display: block">
             Available Purchases
           </div>
-          <div id="available-upgrade-buttons" style="display: block"></div>
+          <div id="available-upgrade-buttons" class="button-container"></div>
           <div id="build-title" class="title" style="display: block">
             Purchased Purchases
           </div>
-          <div id="purchased-upgrade-buttons" style="display: block"></div>
+          <div id="purchased-upgrade-buttons" class="button-container"></div>
         </div>
       </div>
       <div id="tutorial-overlay" class="popup-overlay">

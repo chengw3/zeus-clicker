@@ -25,7 +25,7 @@ export class GameManager {
 
     this.state = {
       energy: 500,
-      CO2: 0,
+      CO2: 20,
       people: 0,
     };
 
@@ -110,6 +110,44 @@ export class GameManager {
     return true;
   }
 
+  checkCaps() {
+    const cappedResources = [
+      {
+        key: "energy",
+        capKey: "energy",
+        elementId: "energy-counter",
+        isHard: true,
+      },
+      {
+        key: "totalPeople",
+        capKey: "people",
+        elementId: "people-counter",
+        isHard: true,
+      },
+      {
+        key: "CO2",
+        capKey: "CO2",
+        elementId: "CO2-counter", // Note lowercase "co2-counter"
+        isHard: false,
+      },
+    ];
+
+    for (const { key, capKey, elementId, isHard } of cappedResources) {
+      const value = this.state[key];
+      const cap = this.cap[capKey];
+      const el = document.getElementById(elementId);
+
+      if (!el) continue;
+
+      if (value > cap) {
+        el.classList.add("flashing");
+        if (isHard) this.state[key] = cap;
+      } else {
+        el.classList.remove("flashing");
+      }
+    }
+  }
+
   updateRates() {
     let energyRate = 0;
     let CO2Rate = 0;
@@ -125,7 +163,7 @@ export class GameManager {
       CO2Rate += (stats.rate.CO2 || 0) * count;
     }
 
-    CO2Rate += this.state.totalPeople * 0.1;
+    CO2Rate += this.state.people * 0.1;
 
     // Preserve existing people rate
     this.rate.energy = energyRate;
@@ -133,12 +171,12 @@ export class GameManager {
     console.log("Updated rates:", this.rate);
   }
 
-  tick(deltaTime = 1) {
-    this.updateRates();
+  tick(deltaTime) {
     this.elapsedTime += deltaTime;
-
     this.state.energy += this.rate.energy * deltaTime;
-    this.state.C02 += this.rate.CO2 * deltaTime;
+    this.state.CO2 += this.rate.CO2 * deltaTime;
+    this.updateRates();
+    this.checkCaps();
     this.handleCO2Collapse(deltaTime);
   }
 
@@ -200,40 +238,39 @@ export class GameManager {
   }
 
   addPerson() {
-    if (this.state.totalPeople >= this.cap.people)
+    if (this.state.people >= this.cap.people) {
+      this.flashUI("people-counter", true);
+      setTimeout(() => this.flashUI("people-counter", false), 1000);
       return { success: false, reason: "cap_reached" };
-    this.state.totalPeople += 1;
+    }
+
+    this.state.people += 1;
     return { success: true };
   }
 
   handleCO2Collapse(deltaTime) {
     const limit = this.getDynamicCO2Limit();
-    const currentCO2 = this.state.totalCO2;
-    if (currentCO2 > limit && !this.warningTriggered) {
-      this.warningTriggered = true;
-      this.explosionTimer = Math.random() * 40 + 20;
-      this.flashCO2UI(true);
-    }
+    const currentCO2 = this.state.CO2;
 
     if (this.warningTriggered) {
       this.explosionTimer -= deltaTime;
+
       if (currentCO2 <= limit) {
         this.warningTriggered = false;
         this.explosionTimer = null;
-        this.flashCO2UI(false);
       } else if (this.explosionTimer <= 0) {
         this.triggerGameOver();
       }
     }
   }
 
-  flashCO2UI(shouldFlash) {
-    const el = document.getElementById("co2-counter");
+  flashUI(elementId, shouldFlash) {
+    const el = document.getElementById(elementId);
     if (el) el.classList.toggle("flashing", shouldFlash);
   }
 
   getDynamicCO2Limit() {
-    return this.state.totalPeople * 5;
+    return this.state.people * 5;
   }
 
   triggerGameOver() {

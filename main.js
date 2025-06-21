@@ -17,22 +17,26 @@ window.addEventListener("DOMContentLoaded", () => {
   startTutorial(game, () => {
     // 🕐 Start ticking only after tutorial is done
     setInterval(() => {
-      game.tick(1);
+      game.tick(0.1);
       updateUI(game);
       renderBuildButtons(game);
       renderBuildings(game);
       renderUpgradeButtons(game);
-    }, 1000);
+    }, 100);
   });
 });
 
 function updateUI(game) {
+  document.getElementById("people-count").textContent = game.state.people;
+  document.getElementById("people-cap").textContent = game.cap.people;
   document.getElementById("energy-count").textContent = Math.floor(
     game.state.energy
   );
-  document.getElementById("co2-count").textContent = Math.floor(game.state.C02);
-  document.getElementById("people-count").textContent = game.state.people;
-  document.getElementById("people-cap").textContent = game.cap.people;
+  document.getElementById("energy-cap").textContent = Math.floor(
+    game.cap.energy
+  );
+  document.getElementById("CO2-count").textContent = Math.floor(game.state.CO2);
+  document.getElementById("CO2-cap").textContent = Math.floor(game.cap.CO2);
 
   const rate = game.rate;
   const rateStr = `⚡ Energy: ${Math.floor(rate.energy)} | 🌫️ CO₂: ${Math.floor(
@@ -57,7 +61,6 @@ function updateUI(game) {
 }
 
 const addPeopleButton = document.getElementById("add-people");
-
 addPeopleButton.addEventListener("click", () => {
   const result = game.addPerson();
 
@@ -67,8 +70,6 @@ addPeopleButton.addEventListener("click", () => {
     }
     return;
   }
-
-  updateUI(game);
 });
 
 // Show a brief warning when people cap is reached
